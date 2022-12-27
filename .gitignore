@@ -1,4 +1,12 @@
 # Byte-compiled / optimized / DLL files
+media/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+static/
+venv/
 __pycache__/
 *.py[cod]
 *$py.class

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+  {% if is_edit %}Редактировать запись{% else %}Добавить запись{% endif %}
+{% endblock %}
+{% block content %}
+{% load user_filters %}
+  <div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+      <div class="card">
+        <div class="card-header">
+          {% if is_edit %}Редактировать запись{% else %}Добавить запись{% endif %}
+          {% include 'includes/error.html' %}
+          <form method="post" enctype="multipart/form-data" action="{% if is_edit %}{% url 'posts:post_edit' post.id %}{% else %}{% url 'posts:post_create' %}{% endif %}">
+          {% csrf_token %}
+          {% include 'includes/form_fields.html' %}
+          <div class="col-md-6 offset-md-4">              
+            <button type="submit" class="btn btn-primary">
+              {% if is_edit %}Сохранить{% else %}Добавить{% endif %}
+            </button>
+          </div>
+        </div> <!-- card body -->
+      </div> <!-- card -->
+    </div> <!-- col -->
+  </div> <!-- row -->
+{% endblock %}
