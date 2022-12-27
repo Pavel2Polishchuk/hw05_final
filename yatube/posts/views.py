@@ -3,10 +3,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
-from .models import Comment, Group, Follow, Post
+from .models import Group, Follow, Post
 
 User = get_user_model()
 
@@ -78,7 +77,11 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if not request.user == post.author:
         return redirect('posts:post_detail', post.pk)
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post
+    )
     if not form.is_valid():
         return render(
             request,
