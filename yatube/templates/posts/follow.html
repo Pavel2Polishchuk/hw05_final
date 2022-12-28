@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}
-  Последние публикации от подписанных авторов
+  Последние публикации от избранных авторов
 {% endblock %}
 {% block content %}
   {% include 'posts/includes/switcher.html' %}
-  <h1>Последние публикации от подписанных авторов</h1>
+  <h1>Последние публикации от избранных авторов</h1>
   {% for post in page_obj %}
     {% include 'posts/includes/single_post.html' %} 
     {% if not forloop.last %}<hr>{% endif %}

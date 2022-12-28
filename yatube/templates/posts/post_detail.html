@@ -52,8 +52,8 @@
       </div>
       </div>
       {% endif %}
-
-      {% for comment in comments %}
+    </article>
+      {% for comment in post.comments.all %}
         <div class="media mb-4">
           <div class="media-body">
             <h5 class="mt-0">
@@ -67,6 +67,5 @@
           </div>
        </div>
       {% endfor %} 
-    </article>
   </div>
 {% endblock %}
