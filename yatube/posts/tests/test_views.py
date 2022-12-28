@@ -17,8 +17,7 @@ from ..models import Follow, Group, Post
 TEST_OF_POST = settings.NUMBER_OF_POSTS + 3
 User = get_user_model()
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT) 
+
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -79,7 +78,6 @@ class PostPagesTests(TestCase):
             )
         }
 
-
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -94,7 +92,6 @@ class PostPagesTests(TestCase):
                 )
                 message = f'Ошибка: {adress} ожидал шаблон {template}'
                 self.assertTemplateUsed(response, template, message)
-
 
     def check_post_info(self, context, page=True):
         if page:
