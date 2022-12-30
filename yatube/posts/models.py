@@ -14,7 +14,10 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField()
+    text = models.TextField(
+        verbose_name = 'Текст сообщения',
+        help_text = 'Введите сообщение'
+    )
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
         User,
@@ -26,6 +29,8 @@ class Post(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+        verbose_name = 'Группа',
+        help_text = 'Выберите группу',
         related_name='posts'
     )
     image = models.ImageField(

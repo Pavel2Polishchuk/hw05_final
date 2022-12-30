@@ -1,4 +1,3 @@
-import shutil
 import tempfile
 
 from django import forms
@@ -14,10 +13,11 @@ from posts.forms import PostForm
 
 from ..models import Follow, Group, Post
 
-TEST_OF_POST = settings.NUMBER_OF_POSTS + 3
 User = get_user_model()
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -84,7 +84,7 @@ class PostPagesTests(TestCase):
         cache.clear()
 
     def test_views_correct_template(self):
-        '''URL-адрес использует соответствующий шаблон.'''
+        """URL-адрес использует соответствующий шаблон."""
         for adress, kwargs, template in self.templates_url_names.values():
             with self.subTest(adress=adress):
                 response = self.authorized_client.get(
@@ -220,6 +220,9 @@ class PostPagesTests(TestCase):
         self.assertNotEqual(content_add, content_cache_clear)
 
 
+TEST_OF_POST = settings.NUMBER_OF_POSTS + 3
+
+
 class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -270,84 +273,6 @@ class PaginatorViewsTest(TestCase):
                 )
 
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-
-
-@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
-class TaskPagesTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TaskPagesTests, cls).setUpClass()
-        cls.user = User.objects.create_user(username="HasNoName")
-        cls.group = Group.objects.create(
-            title="Test group",
-            slug="test_group_slug",
-            description="Test group description",
-        )
-        cls.small_gif = (
-            b"\x47\x49\x46\x38\x39\x61\x02\x00"
-            b"\x01\x00\x80\x00\x00\x00\x00\x00"
-            b"\xFF\xFF\xFF\x21\xF9\x04\x00\x00"
-            b"\x00\x00\x00\x2C\x00\x00\x00\x00"
-            b"\x02\x00\x01\x00\x00\x02\x02\x0C"
-            b"\x0A\x00\x3B"
-        )
-        cls.uploaded = SimpleUploadedFile(
-            name="small.gif", content=cls.small_gif, content_type="image/gif"
-        )
-        cls.post = Post.objects.create(
-            author=cls.user,
-            text="Тестовый текст",
-            group=cls.group,
-            image=cls.uploaded
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
-    def setUp(self):
-        self.guest_client = Client()
-
-    def test_image_in_group_list_page(self):
-        """Картинка передается на страницу group_list."""
-        response = self.guest_client.get(
-            reverse("posts:group_list", kwargs={"slug": self.group.slug}),
-        )
-        obj = response.context["page_obj"][0]
-        self.assertEqual(obj.image, self.post.image)
-
-    def test_image_in_index_and_profile_page(self):
-        """Картинка передается на страницу index_and_profile."""
-        templates = (
-            reverse("posts:index"),
-            reverse("posts:profile", kwargs={"username": self.post.author}),
-        )
-        for url in templates:
-            with self.subTest(url):
-                response = self.guest_client.get(url)
-                obj = response.context["page_obj"][0]
-                self.assertEqual(obj.image, self.post.image)
-
-    def test_image_in_post_detail_page(self):
-        """Картинка передается на страницу post_detail."""
-        response = self.guest_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": self.post.id})
-        )
-        obj = response.context["post"]
-        self.assertEqual(obj.image, self.post.image)
-
-    def test_image_in_page(self):
-        """Проверяем что пост с картинкой создается в БД"""
-        self.assertTrue(
-            Post.objects.filter(
-                text="Тестовый текст",
-                image="posts/small.gif"
-            ).exists()
-        )
-
-
 class FollowViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -372,27 +297,30 @@ class FollowViewsTest(TestCase):
 
     def test_follow_on_user(self):
         """Проверка подписки на пользователя."""
-        count_follow = Follow.objects.count()
         self.follower_client.post(
             reverse(
                 'posts:profile_follow',
                 kwargs={'username': self.post_follower}))
-        follow = Follow.objects.all().latest('id')
-        self.assertEqual(Follow.objects.count(), count_follow + 1)
-        self.assertEqual(follow.author_id, self.post_follower.id)
-        self.assertEqual(follow.user_id, self.post_autor.id)
+        self.assertTrue(
+            Follow.objects.filter(
+                user=self.post_autor,
+                author=self.post_follower).exists()
+        )
 
     def test_unfollow_on_user(self):
         """Проверка отписки от пользователя."""
         Follow.objects.create(
             user=self.post_autor,
             author=self.post_follower)
-        count_follow = Follow.objects.count()
         self.follower_client.post(
             reverse(
                 'posts:profile_unfollow',
                 kwargs={'username': self.post_follower}))
-        self.assertEqual(Follow.objects.count(), count_follow - 1)
+        self.assertFalse(
+            Follow.objects.filter(
+                user=self.post_autor,
+                author=self.post_follower).exists()
+        )
 
     def test_follow_on_authors(self):
         """Проверка записей у тех кто подписан."""
