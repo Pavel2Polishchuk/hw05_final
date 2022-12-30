@@ -224,7 +224,7 @@ class TaskPagesTests(TestCase):
         self.guest_client = Client()
 
     def test_image_in_page(self):
-        """Проверяем что пост с картинкой создается в БД"""
+        """Проверяем что пост с картинкой создается в БД."""
         self.assertTrue(
             Post.objects.filter(
                 text="Тестовый текст",
