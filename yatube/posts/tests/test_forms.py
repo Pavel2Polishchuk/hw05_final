@@ -159,6 +159,7 @@ class CommentTests(TestCase):
         self.assertEqual(Comment.objects.count(), comments_count)
         self.assertRedirects(response, redirect)
 
+
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
