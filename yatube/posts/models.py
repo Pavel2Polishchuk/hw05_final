@@ -37,7 +37,8 @@ class Post(models.Model):
         'Картинка',
         upload_to='posts/',
         blank=True,
-        null=True
+        null=True,
+        help_text='Выберите картинку'
     )
 
     class Meta:
